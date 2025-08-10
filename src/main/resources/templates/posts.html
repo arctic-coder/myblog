@@ -6,7 +6,7 @@
 </head>
 
 <body>
-    <form method="GET" action="/posts/add">
+    <form method="GET" action="/posts/add" th:action="@{/posts/add}">
         <button style="float:right;">ДОБАВИТЬ ПОСТ</button>
     </form>
     <table style="width:50%;margin-left:auto;margin-right:auto;">
@@ -40,8 +40,8 @@
             <td style="border-bottom:thin solid;">
                 <h2 th:text="${post.getTitle()}"></h2>
                 <p>
-                    <a th:href="${'/posts/'+post.getId()}">
-                        <img height="300" th:src="${'http://localhost:8080/images/'+post.getId()}">
+                    <a th:href="@{/posts/{id}(id=${post.getId()})}">
+                        <img height="300" th:src="@{/images/{id}(id=${post.getId()})}">
                     </a>
                 </p>
                 <p th:text="${post.getTextPreview()}"></p>

@@ -43,18 +43,18 @@
 </head>
 
 <body>
-    <a href="/posts" style="float:right;">
+    <a href="/posts" th:href="@{/posts}" style="float:right;">
         <b>НА ГЛАВНУЮ &cudarrr;</b>
     </a>
     <table style="width:50%;margin-left:auto;margin-right:auto;">
         <tr>
             <td>
-                <form method="GET" th:action="${'/posts/'+post.getId()+'/edit'}">
+                <form method="GET" th:action="@{/posts/{id}/edit(id=${post.getId()})}">
                     <button style="float:right;">РЕДАКТИРОВАТЬ ПОСТ</button>
                 </form>
             </td>
             <td>
-                <form method="POST" th:action="${'/posts/'+post.getId()+'/delete'}">
+                <form method="POST" th:action="@{/posts/{id}/delete(id=${post.getId()})}">
                     <button style="float:right;">УДАЛИТЬ ПОСТ</button>
                 </form>
             </td>
@@ -63,10 +63,10 @@
             <td>
                 <h2 th:text="${post.getTitle()}"></h2>
                 <p>
-                    <img height="300" th:src="${'http://localhost:8080/images/'+post.getId()}">
+                    <img height="300" th:src="@{/images/{id}(id=${post.getId()})}">
                 </p>
                 <p>
-                    <form th:action="${'/posts/'+post.getId()+'/like'}" method="post">
+                    <form th:action="@{/posts/{id}/like(id=${post.getId()})}" method="post">
                         <button name="like" value="true">&#x1F44D;</button>
                         <span th:text="${post.getLikesCount()}"></span>
                         <button name="like" value="false">&#128078;</button>
@@ -89,20 +89,20 @@
         </tr>
         <tr th:each="comment : ${post.getComments()}">
             <td style="border-left:thin solid grey;">
-                <form method="POST" th:action="${'/posts/'+post.getId()+'/comments/'+comment.getId()}">
+                <form method="POST" th:action="@{/posts/{pid}/comments/{cid}(pid=${post.getId()}, cid=${comment.getId()})}">
                     <span th:id="${'comment'+comment.getId()}" th:text="${comment.getText()}"></span>
                     <button th:id="${comment.getId()}" onclick="editComment(this.id)" style="float:right;">&#9998;</button>
                 </form>
             </td>
             <td>
-                <form method="POST" th:action="${'/posts/'+post.getId()+'/comments/'+comment.getId()+'/delete'}">
+                <form method="POST" th:action="@{/posts/{pid}/comments/{cid}/delete(pid=${post.getId()}, cid=${comment.getId()})}">
                     <button style="float:right;">&#10007;</button>
                 </form>
             </td>
         </tr>
         <tr>
             <td>
-                <form id="addCommentForm" th:action="${'/posts/'+post.getId()+'/comments'}" method="post">
+                <form id="addCommentForm" th:action="@{/posts/{id}/comments(id=${post.getId()})}" method="post">
                     <button id="addCommentButton" style="float:right;" onclick="addComment()">Добавить комментарий</button>
                 </form>
             </td>
