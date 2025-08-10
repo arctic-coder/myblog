@@ -42,7 +42,6 @@ public class BlogServiceImpl implements BlogService {
         return posts.countFeed(t);
     }
 
-    // остальная логика как у тебя была:
     @Override
     public Optional<Post> getPost(long id) {
         var p = posts.findById(id);
