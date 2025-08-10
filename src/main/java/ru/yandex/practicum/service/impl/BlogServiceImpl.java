@@ -23,9 +23,17 @@ public class BlogServiceImpl implements BlogService {
     @Override
     public List<Post> findFeed(String tag, int pageNumber, int pageSize) {
         String t = tag == null ? "" : tag.trim();
-        int page = Math.max(pageNumber, 1);          // 1-based → гарантируем минимум 1
-        int offset = (page - 1) * pageSize;          // → 0-based
-        return posts.findFeed(t, offset, pageSize);
+        int page = Math.max(pageNumber, 1);
+        int offset = (page - 1) * pageSize;
+
+        var list = posts.findFeed(t, offset, pageSize);
+
+        // комментарии
+        for (var p : list) {
+            p.setComments(comments.findByPostId(p.getId()));
+        }
+
+        return list;
     }
 
     @Override
