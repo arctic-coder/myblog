@@ -23,21 +23,19 @@ public class PostController {
 
     // Лента
     @GetMapping
-    public String feed(@RequestParam(value = "search", required = false) String search,
-                       @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber,
-                       @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
-                       Model model) {
-        String tag = (search == null) ? "" : search.trim();
-        var posts = blog.findFeed(tag, pageNumber, pageSize);
-        int total = blog.countFeed(tag);
+    public String feed(@RequestParam(value = "search", defaultValue = "") String search,
+                       @RequestParam(value = "pageNumber", defaultValue = "1") int pageNumber,
+                       @RequestParam(value = "pageSize",   defaultValue = "10") int pageSize,
+                       org.springframework.ui.Model model) {
+
+        var posts = blog.findFeed(search, pageNumber, pageSize);
+        int total = blog.countFeed(search);
 
         model.addAttribute("posts", posts);
+        model.addAttribute("search", search);
         model.addAttribute("paging", new ru.yandex.practicum.model.Paging(pageNumber, pageSize, total));
-        model.addAttribute("search", tag);
-
         return "posts";
     }
-
 
     // Форм создания/редактирования
     @GetMapping("/add")
@@ -75,6 +73,11 @@ public class PostController {
                 org.springframework.http.HttpStatus.NOT_FOUND, "Post not found"));
         model.addAttribute("post", post);
         return "add-post";
+    }
+
+    @PostMapping("/{id}/edit")
+    public String editRedirect(@PathVariable long id) {
+        return "redirect:/posts/" + id + "/edit";
     }
 
     // Обновить пост

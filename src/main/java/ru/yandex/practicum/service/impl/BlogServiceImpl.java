@@ -20,18 +20,18 @@ public class BlogServiceImpl implements BlogService {
 
     // Лента
     @Override
-    public List<Post> findFeed(String tag, int pageNumber, int pageSize) {
-        String t = (tag == null) ? "" : tag.trim();
-        int offset = Math.max(pageNumber, 0) * pageSize;
+    public java.util.List<ru.yandex.practicum.model.Post> findFeed(String tag, int pageNumber, int pageSize) {
+        String t = tag == null ? "" : tag.trim();
+        int page = Math.max(pageNumber, 1);          // 1-based
+        int offset = (page - 1) * pageSize;          // → 0-based смещение
         return posts.findFeed(t, offset, pageSize);
     }
 
     @Override
     public int countFeed(String tag) {
-        String t = (tag == null) ? "" : tag.trim();
+        String t = tag == null ? "" : tag.trim();
         return posts.countFeed(t);
     }
-
 
     // Пост
     @Override
