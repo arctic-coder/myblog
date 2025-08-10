@@ -1,2 +1,15 @@
-# myblog
-Blog project for Yandex Practicum Java course
+# MyBlog 
+
+Учебный проект — блог на Spring Framework.
+
+## Функциональность 
+- Лента постов: превью, теги, лайки, количество комментариев, фильтрация по тегу, пагинация (10/20/50).
+- Страница поста: заголовок, картинка, текст по абзацам, теги, лайк, CRUD поста, список комментариев, inline-редактирование комментариев (Ctrl+Enter).
+
+## Технологии
+- Java 21
+- Spring Framework 6.x (MVC, Context, JDBC)
+- Thymeleaf
+- H2 
+- Maven 
+- Тесты: JUnit 5, Spring Test, Mockito
