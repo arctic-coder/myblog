@@ -18,6 +18,7 @@
 Используется реляционная БД (H2 в памяти). 
 Всего две таблицы: `posts` и `comments`.
 
+[<img src="docs/images/feed.png" alt="Скрин ленты" width="300">](docs/images/feed.png)
 
 ### posts
 Хранит посты и связанные с ними атрибуты.
