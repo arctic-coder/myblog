@@ -7,8 +7,6 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.yandex.practicum.model.Paging;
 import ru.yandex.practicum.service.BlogService;
 
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 @Controller
@@ -25,122 +23,115 @@ public class PostController {
     @GetMapping
     public String feed(@RequestParam(value = "search", defaultValue = "") String search,
                        @RequestParam(value = "pageNumber", defaultValue = "1") int pageNumber,
-                       @RequestParam(value = "pageSize",   defaultValue = "10") int pageSize,
-                       org.springframework.ui.Model model) {
+                       @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
+                       Model model) {
 
-        var posts = blog.findFeed(search, pageNumber, pageSize);
-        int total = blog.countFeed(search);
+        String tag = search == null ? "" : search.trim();
+        var posts = blog.findFeed(tag, pageNumber, pageSize);     // ← передаём 1-based
+        int total = blog.countFeed(tag);
 
         model.addAttribute("posts", posts);
-        model.addAttribute("search", search);
-        model.addAttribute("paging", new ru.yandex.practicum.model.Paging(pageNumber, pageSize, total));
+        model.addAttribute("search", tag);                        // ← пустая строка по умолчанию
+        model.addAttribute("paging", new Paging(pageNumber, pageSize, total)); // 1-based
         return "posts";
     }
 
-    // Форм создания/редактирования
+    // (c) страница поста
+    @GetMapping("/{id}")
+    public String show(@PathVariable("id") long id, Model model) {
+        return blog.getPost(id)
+                .map(p -> { model.addAttribute("post", p); return "post"; })
+                .orElse("redirect:/posts");
+    }
+
+    // (d) форма создания
     @GetMapping("/add")
     public String addForm() {
-        return "add-post"; // в шаблоне пост проверяется как post==null
-    }
-
-    // Создать пост
-    @PostMapping
-    public String create(@RequestParam("title") String title,
-                         @RequestParam("tags") String tagsText,
-                         @RequestParam("text") String text,
-                         @RequestParam(value = "image", required = false) MultipartFile image) throws IOException {
-        var tags = parseTags(tagsText);
-        byte[] bytes = (image != null && !image.isEmpty()) ? image.getBytes() : null;
-        String contentType = (image != null && !image.isEmpty()) ? image.getContentType() : null;
-
-        long id = blog.createPost(title, tags, text, bytes);
-        return "redirect:/posts/" + id;
-    }
-
-    // Страница поста
-    @GetMapping("/{id}")
-    public String post(@PathVariable("id") long id, Model model) {
-        var post = blog.getPost(id).orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
-                org.springframework.http.HttpStatus.NOT_FOUND, "Post not found"));
-        model.addAttribute("post", post);
-        return "post";
-    }
-
-    // Открыть форму редактирования
-    @GetMapping("/{id}/edit")
-    public String editForm(@PathVariable("id") long id, Model model) {
-        var post = blog.getPost(id).orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
-                org.springframework.http.HttpStatus.NOT_FOUND, "Post not found"));
-        model.addAttribute("post", post);
         return "add-post";
     }
 
-    @PostMapping("/{id}/edit")
-    public String editRedirect(@PathVariable long id) {
-        return "redirect:/posts/" + id + "/edit";
-    }
-
-    // Обновить пост
-    @PostMapping("/{id}")
-    public String update(@PathVariable("id") long id,
-                         @RequestParam("title") String title,
-                         @RequestParam("tags") String tagsText,
+    // (d) создание
+    @PostMapping
+    public String create(@RequestParam("title") String title,
+                         @RequestParam(value = "tags", defaultValue = "") String tags,
                          @RequestParam("text") String text,
-                         @RequestParam(value = "image", required = false) MultipartFile image) throws IOException {
-        var tags = parseTags(tagsText);
-        byte[] bytes = (image != null && !image.isEmpty()) ? image.getBytes() : null;
-        String contentType = (image != null && !image.isEmpty()) ? image.getContentType() : null;
-
-        blog.updatePost(id, title, tags, text, bytes);
+                         @RequestParam(value = "image", required = false) MultipartFile image)  {
+        long id = blog.createPost(title, splitTags(tags), text, bytesOrNull(image));
         return "redirect:/posts/" + id;
     }
 
-    // Удалить пост
+    // (g) лайк
+    @PostMapping("/{id}/like")
+    public String like(@PathVariable("id") long id, @RequestParam("like") boolean like){
+        blog.likePost(id, like);
+        return "redirect:/posts/" + id;
+    }
+
+    // (z по ТЗ) POST /posts/{id}/edit -> редирект на форму редактирования
+    @PostMapping("/{id}/edit")
+    public String editRedirect(@PathVariable("id") long id) {
+        return "redirect:/posts/" + id + "/edit";
+    }
+
+    // форма редактирования (GET), чтобы тест editRedirect_post_to_get_edit проходил
+    @GetMapping("/{id}/edit")
+    public String editForm(@PathVariable("id") long id, Model model){
+        return blog.getPost(id)
+                .map(p -> { model.addAttribute("post", p); return "add-post"; })
+                .orElse("redirect:/posts");
+    }
+
+    // (i) редактирование
+    @PostMapping("/{id}")
+    public String update(@PathVariable("id") long id,
+                         @RequestParam("title") String title,
+                         @RequestParam(value = "tags", defaultValue = "") String tags,
+                         @RequestParam("text") String text,
+                         @RequestParam(value = "image", required = false) MultipartFile image){
+        blog.updatePost(id, title, splitTags(tags), text, bytesOrNull(image));
+        return "redirect:/posts/" + id;
+    }
+
+    // (k) добавить комментарий
+    @PostMapping("/{id}/comments")
+    public String addComment(@PathVariable("id") long id, @RequestParam("text") String text)  {
+        blog.addComment(id, text);
+        return "redirect:/posts/" + id;
+    }
+
+    // (l) редактировать комментарий
+    @PostMapping("/{id}/comments/{commentId}")
+    public String editComment(@PathVariable("id") long id,
+                              @PathVariable("commentId") long commentId,
+                              @RequestParam("text") String text) {
+        blog.updateComment(id, commentId, text);
+        return "redirect:/posts/" + id;
+    }
+
+    // (m) удалить комментарий
+    @PostMapping("/{id}/comments/{commentId}/delete")
+    public String deleteComment(@PathVariable("id") long id,
+                                @PathVariable("commentId") long commentId) {
+        blog.deleteComment(id, commentId);
+        return "redirect:/posts/" + id;
+    }
+
+    // (n) удалить пост
     @PostMapping("/{id}/delete")
     public String delete(@PathVariable("id") long id) {
         blog.deletePost(id);
         return "redirect:/posts";
     }
 
-    // Лайк/анлайк
-    @PostMapping("/{id}/like")
-    public String like(@PathVariable("id") long id,
-                       @RequestParam("like") boolean like) {
-        blog.likePost(id, like);
-        return "redirect:/posts/" + id;
+    // helpers
+    private static byte[] bytesOrNull(MultipartFile f) {
+        try { return (f != null && !f.isEmpty()) ? f.getBytes() : null; }
+        catch (Exception e) { throw new RuntimeException(e); }
     }
-
-    // Добавить комментарий
-    @PostMapping("/{id}/comments")
-    public String addComment(@PathVariable("id") long postId,
-                             @RequestParam("text") String text) {
-        blog.addComment(postId, text);
-        return "redirect:/posts/" + postId;
-    }
-
-    // Обновить комментарий
-    @PostMapping("/{id}/comments/{commentId}")
-    public String editComment(@PathVariable("id") long postId,
-                              @PathVariable("commentId") long commentId,
-                              @RequestParam("text") String text) {
-        blog.updateComment(postId, commentId, text);
-        return "redirect:/posts/" + postId;
-    }
-
-    // Удалить комментарий
-    @PostMapping("/{id}/comments/{commentId}/delete")
-    public String deleteComment(@PathVariable("id") long postId,
-                                @PathVariable("commentId") long commentId) {
-        blog.deleteComment(postId, commentId);
-        return "redirect:/posts/" + postId;
-    }
-
-    // --- helpers ---
-    private static List<String> parseTags(String tagsText) {
-        if (tagsText == null || tagsText.isBlank()) return List.of();
-        return Arrays.stream(tagsText.split(","))
+    private static List<String> splitTags(String csv) {
+        return (csv == null || csv.isBlank())
+                ? java.util.List.of()
+                : java.util.Arrays.stream(csv.split("[,\\s]+"))
                 .map(String::trim).filter(s -> !s.isEmpty()).toList();
     }
-
-    private static String nullToEmpty(String s) { return s == null ? "" : s; }
 }

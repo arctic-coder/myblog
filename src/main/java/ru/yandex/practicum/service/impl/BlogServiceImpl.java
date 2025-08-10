@@ -1,8 +1,6 @@
 package ru.yandex.practicum.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.model.Post;
 import ru.yandex.practicum.repository.CommentRepository;
 import ru.yandex.practicum.repository.PostRepository;
@@ -12,18 +10,21 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class BlogServiceImpl implements BlogService {
 
     private final PostRepository posts;
     private final CommentRepository comments;
 
-    // Лента
+    public BlogServiceImpl(PostRepository posts, CommentRepository comments) {
+        this.posts = posts;
+        this.comments = comments;
+    }
+
     @Override
-    public java.util.List<ru.yandex.practicum.model.Post> findFeed(String tag, int pageNumber, int pageSize) {
+    public List<Post> findFeed(String tag, int pageNumber, int pageSize) {
         String t = tag == null ? "" : tag.trim();
-        int page = Math.max(pageNumber, 1);          // 1-based
-        int offset = (page - 1) * pageSize;          // → 0-based смещение
+        int page = Math.max(pageNumber, 1);          // 1-based → гарантируем минимум 1
+        int offset = (page - 1) * pageSize;          // → 0-based
         return posts.findFeed(t, offset, pageSize);
     }
 
@@ -33,7 +34,7 @@ public class BlogServiceImpl implements BlogService {
         return posts.countFeed(t);
     }
 
-    // Пост
+    // остальная логика как у тебя была:
     @Override
     public Optional<Post> getPost(long id) {
         var p = posts.findById(id);
@@ -42,51 +43,42 @@ public class BlogServiceImpl implements BlogService {
     }
 
     @Override
-    @Transactional
-    public long createPost(String title, List<String> tags, String text, byte[] imageBytes) {
-        return posts.create(title, tags, text, imageBytes);
+    public long createPost(String title, List<String> tags, String text, byte[] image) {
+        return posts.create(title, tags, text, image);
     }
 
     @Override
-    @Transactional
-    public void updatePost(long id, String title, List<String> tags, String text, byte[] imageBytes) {
-        posts.update(id, title, tags, text, imageBytes);
+    public void updatePost(long id, String title, List<String> tags, String text, byte[] image) {
+        posts.update(id, title, tags, text, image);
     }
 
     @Override
-    @Transactional
     public void deletePost(long id) {
-        posts.delete(id); // comments удалятся каскадом
+        posts.delete(id);
     }
 
-    // Лайки
     @Override
-    @Transactional
-    public void likePost(long id, boolean likeUp) {
-        posts.like(id, likeUp);
+    public void likePost(long id, boolean like) {
+        posts.like(id, like);
     }
 
-    // Комменты
     @Override
-    @Transactional
     public long addComment(long postId, String text) {
         return comments.create(postId, text);
     }
 
     @Override
-    @Transactional
     public void updateComment(long postId, long commentId, String text) {
         comments.update(postId, commentId, text);
     }
 
     @Override
-    @Transactional
     public void deleteComment(long postId, long commentId) {
         comments.delete(postId, commentId);
     }
 
     @Override
-    public Optional<byte[]> loadImage(long postId) {
-        return posts.findById(postId).map(Post::getImageData).filter(bytes -> bytes != null && bytes.length > 0);
+    public java.util.Optional<byte[]> loadImage(long postId) {
+        return posts.findById(postId).map(Post::getImageData).filter(b -> b != null && b.length > 0);
     }
 }

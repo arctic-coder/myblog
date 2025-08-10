@@ -28,4 +28,31 @@ public class Post {
     @Builder.Default
     private List<Comment> comments = new ArrayList<>();
 
+    public String getTextPreview() {
+        if (getText().isBlank()) return "";
+        String[] lines = getText().split("\\R+");
+        StringBuilder sb = new StringBuilder();
+        int count = Math.min(lines.length, 3);
+        for (int i = 0; i < count; i++) {
+            if (!lines[i].isBlank()) {
+                if (sb.length() > 0) sb.append(System.lineSeparator());
+                sb.append(lines[i].trim());
+            }
+        }
+        return sb.toString();
+    }
+
+    public String getTagsAsText() {
+        if (tags == null || tags.isEmpty()) return "";
+        return String.join(",", tags);
+    }
+
+    public java.util.List<String> getTextParts() {
+        if (text == null || text.isBlank()) return java.util.List.of();
+        return java.util.Arrays.stream(text.split("\\R"))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList();
+    }
+
 }

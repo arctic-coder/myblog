@@ -1,25 +1,23 @@
 package ru.yandex.practicum.model;
 
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.ToString;
 
 @Getter
-@ToString
-@EqualsAndHashCode
 @AllArgsConstructor
 public class Paging {
-    private final int pageNumber;
+    private final int pageNumber; // 1-based
     private final int pageSize;
     private final int total;
 
-    public boolean hasPrevious() {
-        return pageNumber > 0;
-    }
+    public int pageNumber() { return pageNumber; }
+    public int pageSize()   { return pageSize; }
+    public boolean hasPrevious() { return pageNumber > 1; }
+    public boolean isHasPrevious() { return hasPrevious(); }
 
     public boolean hasNext() {
-        long shown = (long) (pageNumber + 1) * pageSize;
+        long shown = (long) pageNumber * pageSize; // 1-based
         return shown < total;
     }
+    public boolean isHasNext() { return hasNext(); }
 }
