@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Витрина товаров</title>
+</head>
+
+<body>
+    <form method="GET" action="/posts/add">
+        <button style="float:right;">ДОБАВИТЬ ПОСТ</button>
+    </form>
+    <table style="width:50%;margin-left:auto;margin-right:auto;">
+        <tr>
+            <td>
+                <form>
+                    <p>
+                        <label for="search">Найти по тегу: </label>
+                        <input id="search" style="width:300px;" name="search" th:value="${search}">
+                        <button name="action">&#128269;</button>
+                    </p>
+                    <p>
+                        <label for="pageSize">Число постов: </label>
+                        <select id="pageSize" name="pageSize" onchange="this.form.submit()">
+                            <option value="5" th:selected="${paging.pageSize()==5}">5</option>
+                            <option value="10" th:selected="${paging.pageSize()==10}">10</option>
+                            <option value="20" th:selected="${paging.pageSize()==20}">20</option>
+                            <option value="50" th:selected="${paging.pageSize()==50}">50</option>
+                            <option value="100" th:selected="${paging.pageSize()==100}">100</option>
+                        </select>
+                    </p>
+                    <p>
+                        <button th:if="${paging.hasPrevious()}" name="pageNumber" th:value="${paging.pageNumber()-1}">&lt;</button>
+                        <span th:text="${'Страница: '+paging.pageNumber()}"></span>
+                        <button th:if="${paging.hasNext()}" name="pageNumber" th:value="${paging.pageNumber()+1}">&gt;</button>
+                    </p>
+                </form>
+            </td>
+        </tr>
+        <tr th:each="post : ${posts}">
+            <td style="border-bottom:thin solid;">
+                <h2 th:text="${post.getTitle()}"></h2>
+                <p>
+                    <a th:href="${'/posts/'+post.getId()}">
+                        <img height="300" th:src="${'http://localhost:8080/images/'+post.getId()}">
+                    </a>
+                </p>
+                <p th:text="${post.getTextPreview()}"></p>
+                <p>
+                    <span th:text="${'&#x1F44D; '+post.getLikesCount()}"></span>
+                    <span th:text="${'&#x2709; '+post.getComments().size()}"></span>
+                </p>
+                <p>
+                    <span th:each="tag : ${post.getTags()}" th:text="${'#'+tag+' '}"></span>
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
