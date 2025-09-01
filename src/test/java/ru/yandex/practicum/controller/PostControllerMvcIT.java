@@ -1,54 +1,29 @@
 package ru.yandex.practicum.controller;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.ContextHierarchy;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.web.context.WebApplicationContext;
-
-import ru.yandex.practicum.configuration.ThymeleafConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.repository.CommentRepository;
-import ru.yandex.practicum.repository.jdbc.JdbcCommentRepository;
-import ru.yandex.practicum.repository.jdbc.JdbcPostRepository;
-import ru.yandex.practicum.service.impl.BlogServiceImpl;
-import ru.yandex.practicum.testconfig.TestDbConfig;
 
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
-@WebAppConfiguration
-@ExtendWith(SpringExtension.class)
-@ContextHierarchy({
-        @ContextConfiguration(classes = {
-                TestDbConfig.class,
-                JdbcPostRepository.class,
-                JdbcCommentRepository.class,
-                BlogServiceImpl.class
-        }),
-        @ContextConfiguration(classes = {
-                WebConfiguration.class,
-                ThymeleafConfiguration.class
-        })
-})
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
 class PostControllerMvcIT {
 
-    @Autowired WebApplicationContext wac;
-    @Autowired CommentRepository comments;
+    @Autowired
+    CommentRepository comments;
 
-    org.springframework.test.web.servlet.MockMvc mvc;
-
-    @BeforeEach
-    void setup() {
-        mvc = webAppContextSetup(wac).build();
-    }
+    @Autowired
+    MockMvc mvc;
 
     // GET "posts" - список постов на странице ленты постов
     @Test

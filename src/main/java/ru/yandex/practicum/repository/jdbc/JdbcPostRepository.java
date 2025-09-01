@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.model.Comment;
 import ru.yandex.practicum.model.Post;
 import ru.yandex.practicum.repository.PostRepository;
 
