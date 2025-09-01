@@ -1,32 +1,25 @@
 package ru.yandex.practicum.controller;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.ContextHierarchy;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.web.WebAppConfiguration;
-import ru.yandex.practicum.WebConfiguration;
-import ru.yandex.practicum.configuration.ThymeleafConfiguration;
-import ru.yandex.practicum.testconfig.TestDbConfig;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
-@WebAppConfiguration
-@ContextHierarchy({
-        @ContextConfiguration(classes = { TestDbConfig.class }),
-        @ContextConfiguration(classes = { WebConfiguration.class, ThymeleafConfiguration.class, RootController.class })
-})
+@SpringBootTest
+@AutoConfigureMockMvc
 class RootControllerMvcIT {
-    @org.springframework.beans.factory.annotation.Autowired org.springframework.web.context.WebApplicationContext wac;
+
+    @Autowired
+    MockMvc mvc;
 
     //GET "/" - редирект на "/posts"
     @Test
     void rootRedirectsToPostsFeed() throws Exception {
-        var mvc = webAppContextSetup(wac).build();
         mvc.perform(get("/"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/posts"));

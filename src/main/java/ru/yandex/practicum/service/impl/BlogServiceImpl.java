@@ -1,5 +1,6 @@
 package ru.yandex.practicum.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.model.Post;
 import ru.yandex.practicum.repository.CommentRepository;
@@ -10,15 +11,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class BlogServiceImpl implements BlogService {
 
     private final PostRepository posts;
     private final CommentRepository comments;
-
-    public BlogServiceImpl(PostRepository posts, CommentRepository comments) {
-        this.posts = posts;
-        this.comments = comments;
-    }
 
     @Override
     public List<Post> findFeed(String tag, int pageNumber, int pageSize) {
