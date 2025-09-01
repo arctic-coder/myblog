@@ -6,7 +6,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
-import ru.yandex.practicum.WebConfiguration;
 import ru.yandex.practicum.configuration.ThymeleafConfiguration;
 import ru.yandex.practicum.testconfig.TestDbConfig;
 

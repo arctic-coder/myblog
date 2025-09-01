@@ -11,7 +11,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
 
-import ru.yandex.practicum.WebConfiguration;
 import ru.yandex.practicum.configuration.ThymeleafConfiguration;
 import ru.yandex.practicum.repository.CommentRepository;
 import ru.yandex.practicum.repository.jdbc.JdbcCommentRepository;
